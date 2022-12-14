@@ -18,6 +18,7 @@ import logging
 from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 import requests
+import json
 
 # Enable logging
 logging.basicConfig(
@@ -41,15 +42,7 @@ def get_chat_id(self, message):
 # context.
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
-    user = update.effective_user
-    update.message.reply_markdown_v2(
-        fr'Olá, {user.mention_markdown_v2()}\!',
-        reply_markup=ForceReply(selective=True),
-    )
-    update.message.reply_markdown_v2(
-        fr'Para iniciar digite o comando /link e em seguida o link do produto desejado',
-        reply_markup=ForceReply(selective=True),
-    )
+    update.message.reply_text('Bem vindo ao bot de produtos do site AMAZON\n\nPara cadastrar um produto da amazon digite /link <link do produto da amazon>\n\nPara verificar produtos cadastrados digite /produtos')
 
 
 
@@ -58,15 +51,42 @@ def help_command(update: Update, context: CallbackContext) -> None:
     if update.message.chat.type == 'private':
         telegram_id = update.message.from_user.id
         print(telegram_id)
-    update.message.reply_text('Help!')
+    update.message.reply_text('Para cadastrar um produto da amazon digite /link <link do produto da amazon>\n\nPara verificar produtos cadastrados digite /produtos')
+
+
+def produtos(update: Update, context: CallbackContext) -> None:
+    """Send a message when the command /produtos is issued."""
+    if update.message.chat.type == 'private':
+        telegram_id = str(update.message.from_user.id)
+    else:
+        update.message.reply_text("Bot não disponível para o seu tipo de chat")
+        return
+
+    
+    requestheaders = {
+        "id": telegram_id
+    }
+
+
+    url = f"http://localhost:8080/retornaprodutos"
+    verifica = requests.get(url, headers=requestheaders)
+    verifica = verifica.json()
+    print("type>", type(verifica))
+    if not verifica:
+        update.message.reply_text("Não há produtos cadastrados\n\n")
+        return
+    update.message.reply_text("Lista de produtos cadastrados:\n\n")
+    for nome, preco in verifica:
+        resposta = "\nProduto: " + nome + "\ncom o preço: " + str(preco)
+        update.message.reply_text(resposta)
+
 
 def link(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /link is issued."""
-    update.message.reply_text("Estamos conferindo o seu produto!\n\nIsso pode levar alguns segundos!")
+    update.message.reply_text("Estamos conferindo o seu produto!\n \nIsso pode levar alguns segundos!")
     link = update.message.text[6:]
     if update.message.chat.type == 'private':
         telegram_id = str(update.message.from_user.id)
-        print(telegram_id)
     else:
         update.message.reply_text("Bot não disponível para o seu tipo de chat")
         return
@@ -74,27 +94,32 @@ def link(update: Update, context: CallbackContext) -> None:
         "link": link,
         "id": telegram_id
     }
+    url = f"http://localhost:8080/verificaproduto"
+    verifica = requests.get(url, headers=requestheaders)
+    verifica = verifica.json()
+    if verifica["resposta"] == "ok":
+        pass
+    else:
+        resposta = "Produto ja cadastrado anteriormente, digite /produtos para listar os produtos cadastrados"
+        update.message.reply_text(resposta)
+        return
 
-    print("request", requestheaders)
     url = f"http://localhost:8080/cadastraproduto"
 
     try: 
         dados = requests.get(url, headers=requestheaders)
         dados = dados.json()
-        print("\n>>>>>>>>>>> dados: ", dados, "<<<<<<<<<<<<<<<\n")
     except : 
         update.message.reply_text("Produto nao encontrado")
         return
-
-
 
     resposta = "Produto com o nome: " + dados["titulo"] + "\nPreço: " + dados["preco"] + "\nFoi cadastrado com sucesso!!!"
     update.message.reply_text(resposta)
 
 
-def echo(update: Update, context: CallbackContext) -> None:
-    """Echo the user message."""
-    update.message.reply_text(update.message.text)
+# def echo(update: Update, context: CallbackContext) -> None:
+#     """Echo the user message."""
+#     update.message.reply_text(update.message.text)
 
 
 def main() -> None:
@@ -109,9 +134,10 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("link", link))
+    dispatcher.add_handler(CommandHandler("produtos", produtos))
 
     # on non command i.e message - echo the message on Telegram
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+    # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
 
     # Start the Bot
     updater.start_polling()
