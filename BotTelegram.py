@@ -17,6 +17,7 @@ import logging
 
 from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+import requests
 
 # Enable logging
 logging.basicConfig(
@@ -46,6 +47,28 @@ def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text('Help!')
 
+def link(update: Update, context: CallbackContext) -> None:
+    """Send a message when the command /link is issued."""
+    update.message.reply_text("Estamos conferindo o seu produto!\n\nIsso pode levar alguns segundos!")
+    link = update.message.text[6:]
+    requestheaders = {
+        "link": link
+    }
+    url = f"http://localhost:8080/produto"
+
+    try: 
+        dados = requests.get(url, headers=requestheaders)
+        dados = dados.json()
+        print("\n>>>>>>>>>>> dados: ", dados, "<<<<<<<<<<<<<<<\n")
+    except : 
+        update.message.reply_text("Produto nao encontrado")
+        return
+
+
+
+    resposta = "Produto com o nome: " + dados["titulo"] + "\nPreço: " + dados["preco"] + "\nFoi cadastrado com sucesso!!!"
+    update.message.reply_text(resposta)
+
 
 def echo(update: Update, context: CallbackContext) -> None:
     """Echo the user message."""
@@ -63,6 +86,7 @@ def main() -> None:
     # on different commands - answer in Telegram
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
+    dispatcher.add_handler(CommandHandler("link", link))
 
     # on non command i.e message - echo the message on Telegram
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
