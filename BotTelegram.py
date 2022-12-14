@@ -26,6 +26,16 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+def get_chat_id(self, message):
+        '''
+        Telegram chat type can be either "private", "group", "supergroup" or
+        "channel".
+        Return user ID if it is of type "private", chat ID otherwise.
+        '''
+        if message.chat.type == 'private':
+            return message.user.id
+
+        return message.chat.id
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
@@ -45,16 +55,28 @@ def start(update: Update, context: CallbackContext) -> None:
 
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
+    if update.message.chat.type == 'private':
+        telegram_id = update.message.from_user.id
+        print(telegram_id)
     update.message.reply_text('Help!')
 
 def link(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /link is issued."""
     update.message.reply_text("Estamos conferindo o seu produto!\n\nIsso pode levar alguns segundos!")
     link = update.message.text[6:]
+    if update.message.chat.type == 'private':
+        telegram_id = str(update.message.from_user.id)
+        print(telegram_id)
+    else:
+        update.message.reply_text("Bot não disponível para o seu tipo de chat")
+        return
     requestheaders = {
-        "link": link
+        "link": link,
+        "id": telegram_id
     }
-    url = f"http://localhost:8080/produto"
+
+    print("request", requestheaders)
+    url = f"http://localhost:8080/cadastraproduto"
 
     try: 
         dados = requests.get(url, headers=requestheaders)
