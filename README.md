@@ -17,3 +17,5 @@ Para verificar os preços dos produtos cadastradros basta utilizar o comando **p
 * Apos o envio do comando **/link**, primeiramente é requisitado para o servidor utilizando HTPPS e o método GET através de um __endpoint__, que então chamará o método do Selenium, que carregará a página solicitada, que terá seus dados coletados pelo BeautifullSoup.
 
 * Após a coleta dos dados, os dados são retornados ao servidor e então ao TelegramBot utilizando HTTPS.
+
+* Usando o comando **/produtos**, é possível ver uma lista dos produtos consultados anteriormente.
