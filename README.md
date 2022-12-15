@@ -8,7 +8,4 @@ O monitoramento será feito através de Web Scraping ([Selenium](https://www.sel
 
 ## Arquitetura
 
-<figure markdown>
-  ![Image title](https://github.com/delriog/PriceTracker/blob/main/imagens/priceTracker.png) width="800" }
-  <figcaption>Image caption</figcaption>
-</figure>
+![priceTracker.png](imagens/priceTracker.png)
