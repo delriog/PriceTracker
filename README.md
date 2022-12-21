@@ -20,7 +20,7 @@ Para verificar os preços dos produtos cadastradros basta utilizar o comando `/p
 
 * Após a coleta dos dados, os dados são retornados ao servidor e então ao TelegramBot utilizando HTTPS.
 
-* Usando o comando `/produtos`, é possível ver uma lista dos produtos cadastrados anteriormente.
+* Usando o comando `/produtos`, é possível ver uma lista dos produtos cadastrados anteriormente, e seus valores atuais, além de que se obtevre desconto desde a ultima consulta.
 
 ## Endpoints do Servidor
 
