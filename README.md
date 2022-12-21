@@ -8,7 +8,7 @@ A coleta de dados será feita através de Web Scraping ([Selenium](https://www.s
 
 Para o cadastro de um produto basta enviar o comando `/link` juntamento com o link de um produto da Amazon, como por exemplo: `/link` https://www.amazon.com.br/seu-produto.
 
-Para verificar os preços dos produtos cadastradros basta utilizar o comando `produtos`, que retornará todos os produtos cadastrados para aquele usuário.
+Para verificar os preços dos produtos cadastradros basta utilizar o comando `/produtos`, que retornará todos os produtos cadastrados para aquele usuário.
 
 ## Arquitetura
 
@@ -23,3 +23,15 @@ Para verificar os preços dos produtos cadastradros basta utilizar o comando `pr
 * Usando o comando `/produtos`, é possível ver uma lista dos produtos cadastrados anteriormente.
 
 ## Endpoints do Servidor
+
+### `/cadastraproduto`
+
+É responsável pelo cadastro do produto através do ID do chat do usuário, registrando ID, NOME DO PRODUTO, LINK e PREÇO.
+
+### `/verificaproduto`
+
+É responsãvel por verificar se um produto já está cadastrado ou não, a verificação ocorre por ID de usuário e link do produto.
+
+### `/retornaprodutos`
+
+É responsável por listar os produtos cadastrados de um usuário. Vale ressaltar que os produtos cadastrados também terão seus preços atualizados e será indicado caso o produto esteja com desconto em seu valou.
