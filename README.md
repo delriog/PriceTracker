@@ -35,3 +35,14 @@ Para verificar os preços dos produtos cadastradros basta utilizar o comando `/p
 ### `/retornaprodutos`
 
 É responsável por listar os produtos cadastrados de um usuário. Vale ressaltar que os produtos cadastrados também terão seus preços atualizados e será indicado caso o produto esteja com desconto em seu valou.
+
+
+# Instalação
+## Instalação
+- Para instalação é necessário a instalação dos pacotes para Python dos Sowftwares citados anteriormente, sendo eles
+  - Selenium
+  - BeautifulSoup
+  - Flask
+
+- Após a instalação, executaremos o Bot Telegram de acordo com o Token único do bot em questão.
+- Segundamente, é executado o servidor que receberá as requisições do bot.
