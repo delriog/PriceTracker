@@ -38,7 +38,6 @@ Para verificar os preços dos produtos cadastradros basta utilizar o comando `/p
 
 
 # Instalação
-## Instalação
 - Para instalação é necessário a instalação dos pacotes para Python dos Sowftwares citados anteriormente, sendo eles
   - Selenium
   - BeautifulSoup
