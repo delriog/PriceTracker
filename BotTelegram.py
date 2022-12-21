@@ -27,7 +27,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def get_chat_id(self, message):
+def get_chat_id(self, message): # Function to get the chat id from the user that sent the message
         '''
         Telegram chat type can be either "private", "group", "supergroup" or
         "channel".
@@ -38,14 +38,13 @@ def get_chat_id(self, message):
 
         return message.chat.id
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
+# Funcction that display the first message
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     update.message.reply_text('Bem vindo ao bot de produtos do site AMAZON\n\nPara cadastrar um produto da amazon digite /link <link do produto da amazon>\n\nPara verificar produtos cadastrados digite /produtos')
 
 
-
+# Function that show the help options
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     if update.message.chat.type == 'private':
@@ -53,11 +52,13 @@ def help_command(update: Update, context: CallbackContext) -> None:
         print(telegram_id)
     update.message.reply_text('Para cadastrar um produto da amazon digite /link <link do produto da amazon>\n\nPara verificar produtos cadastrados digite /produtos')
 
-
+# Function that returns a list of the registered products
 def produtos(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /produtos is issued."""
-    if update.message.chat.type == 'private':
+
+    if update.message.chat.type == 'private': # Search for the user chat id
         telegram_id = str(update.message.from_user.id)
+
     else:
         update.message.reply_text("Bot não disponível para o seu tipo de chat")
         return
@@ -67,59 +68,71 @@ def produtos(update: Update, context: CallbackContext) -> None:
         "id": telegram_id
     }
 
+    url = f"http://localhost:8080/retornaprodutos" # Endpoint that will handle the requisition
 
-    url = f"http://localhost:8080/retornaprodutos"
-    verifica = requests.get(url, headers=requestheaders)
+    verifica = requests.get(url, headers=requestheaders) # Calls the endpoint
     verifica = verifica.json()
-    print("type>", type(verifica))
-    if not verifica:
+    produtos = verifica["produtos"] # A list of the registeres products
+    produtos_atualizados = verifica["descontos"] # A list of the products that have discount
+
+    if not verifica: # If doesnt have any registered products
         update.message.reply_text("Não há produtos cadastrados\n\n")
         return
-    update.message.reply_text("Lista de produtos cadastrados:\n\n")
-    for nome, preco in verifica:
+
+    update.message.reply_text("Lista de produtos cadastrados:\n\n") # Display the registered products
+
+    for nome, preco, link in produtos:
+        for links in produtos_atualizados:
+            if link == links:
+                update.message.reply_text("Produto com desconto:") # If the product had discount
         resposta = "\nProduto: " + nome + "\ncom o preço: " + str(preco)
         update.message.reply_text(resposta)
 
 
-def link(update: Update, context: CallbackContext) -> None:
+def link(update: Update, context: CallbackContext) -> None: # Function that register a new product
     """Send a message when the command /link is issued."""
+
     update.message.reply_text("Estamos conferindo o seu produto!\n \nIsso pode levar alguns segundos!")
+
     link = update.message.text[6:]
+
     if update.message.chat.type == 'private':
         telegram_id = str(update.message.from_user.id)
+
     else:
         update.message.reply_text("Bot não disponível para o seu tipo de chat")
         return
-    requestheaders = {
+
+    requestheaders = { # Header with the link and user chat id
         "link": link,
         "id": telegram_id
     }
-    url = f"http://localhost:8080/verificaproduto"
-    verifica = requests.get(url, headers=requestheaders)
+
+    url = f"http://localhost:8080/verificaproduto" # Endpoint that verify the product
+
+    verifica = requests.get(url, headers=requestheaders) # Calss the endpoint
     verifica = verifica.json()
-    if verifica["resposta"] == "ok":
+
+    if verifica["resposta"] == "ok": # If the product is not registered
         pass
     else:
         resposta = "Produto ja cadastrado anteriormente, digite /produtos para listar os produtos cadastrados"
         update.message.reply_text(resposta)
         return
 
-    url = f"http://localhost:8080/cadastraproduto"
+    url = f"http://localhost:8080/cadastraproduto" # Endpoint that register the products
 
     try: 
-        dados = requests.get(url, headers=requestheaders)
+        dados = requests.get(url, headers=requestheaders) # Calss the endpoint
         dados = dados.json()
     except : 
-        update.message.reply_text("Produto nao encontrado")
+        update.message.reply_text("Produto nao encontrado") 
         return
 
-    resposta = "Produto com o nome: " + dados["titulo"] + "\nPreço: " + dados["preco"] + "\nFoi cadastrado com sucesso!!!"
+    resposta = "Produto com o nome: " + dados["titulo"] + "\nPreço: " + dados["preco"] + "\nFoi cadastrado com sucesso!!!" # Format the answer
     update.message.reply_text(resposta)
 
 
-# def echo(update: Update, context: CallbackContext) -> None:
-#     """Echo the user message."""
-#     update.message.reply_text(update.message.text)
 
 
 def main() -> None:
